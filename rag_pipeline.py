@@ -390,5 +390,5 @@ class RAGPipeline:
             num_chunks=self._store.size,
             embedding_dim=self._embedder.dim,
             model_name=cfg.EMBEDDING_MODEL,
-            llm_model=cfg.GEMINI_MODEL,
+            llm_model=cfg.LLM_MODEL,
         )
