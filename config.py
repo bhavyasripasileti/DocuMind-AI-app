@@ -8,7 +8,6 @@ All tuneable knobs live here — read from environment variables.
 import os
 import streamlit as st
 from dotenv import load_dotenv
-from groq import Groq
 
 load_dotenv()
 
