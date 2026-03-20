@@ -28,7 +28,7 @@ class Config:
     EMBEDDING_MODEL = get_env("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
 
     # ── Chunking ──
-    CHUNK_SIZE = int(get_env("CHUNK_SIZE", "800"))
+    CHUNK_SIZE = int(get_env("CHUNK_SIZE", "1000"))
     CHUNK_OVERLAP = int(get_env("CHUNK_OVERLAP", "150"))
 
     # ── Retrieval ──
