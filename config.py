@@ -36,8 +36,10 @@ class Config:
     TOP_K_CHUNKS: int = int(os.getenv("TOP_K_CHUNKS", 5))
 
     # ── UI ────────────────────────────────────────────────────────
-    APP_TITLE: str = "Smart PDF Chat"
-    APP_SUBTITLE: str = "Upload PDFs · Ask questions · Get grounded answers"
+    #APP_TITLE: str = "Smart PDF Chat"
+    #APP_SUBTITLE: str = "Upload PDFs · Ask questions · Get grounded answers"
+    APP_TITLE = "DocuMind AI"
+    APP_SUBTITLE = "Chat with your documents using AI"
 
     @classmethod
     def validate(cls) -> None:
