@@ -23,7 +23,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
-
+from groq import Groq
 import numpy as np
 
 from config import cfg
@@ -222,64 +222,32 @@ class FAISSVectorStore:
 #  LLM client
 # ─────────────────────────────────────────────────────────────────────────────
 
-class GeminiLLM:
-    """
-    Google Gemini client using the NEW unified `google-genai` SDK.
-
-    The old `google-generativeai` SDK is deprecated and all Gemini 1.0/1.5
-    models have been retired (return 404). This class uses `google-genai`
-    with current models: gemini-2.0-flash, gemini-2.5-flash, gemini-2.5-pro.
-    """
-
-    def __init__(self, model_name: str = cfg.GEMINI_MODEL, api_key: str = cfg.GOOGLE_API_KEY):
-        from google import genai
-        self._client = genai.Client(api_key=api_key)
+class GroqLLM:
+    def __init__(self, model_name: str, api_key: str):
+        self._client = Groq(api_key=api_key)
         self._model_name = model_name
-        logger.info("Gemini client ready — model: '%s'", model_name)
+        logger.info("Groq client ready — model: '%s'", model_name)
 
     def generate(self, prompt: str, temperature: float = 0.2) -> str:
-        """
-        Send a prompt to Gemini and return the text response.
-
-        Args:
-            prompt:      Full prompt string (system + context + question).
-            temperature: Lower = more factual/deterministic (good for RAG).
-
-        Returns:
-            Generated answer string.
-
-        Raises:
-            RuntimeError: If the API call fails or returns an empty response.
-        """
-        from google import genai
-        from google.genai import types
-
         try:
-            response = self._client.models.generate_content(
+            response = self._client.chat.completions.create(
                 model=self._model_name,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    temperature=temperature,
-                    max_output_tokens=1024,
-                ),
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=temperature,
+                max_tokens=1024,
             )
         except Exception as exc:
-            raise RuntimeError(f"Gemini API call failed: {exc}") from exc
+            raise RuntimeError(f"Groq API call failed: {exc}") from exc
 
-        # Extract text safely
-        try:
-            answer = response.text.strip() if response.text else ""
-        except Exception as exc:
-            raise RuntimeError(
-                "Gemini returned an empty or blocked response. "
-                "Try rephrasing your question."
-            ) from exc
+        answer = response.choices[0].message.content.strip()
 
         if not answer:
-            raise RuntimeError("Gemini returned an empty response.")
+            raise RuntimeError("Groq returned empty response.")
 
         return answer
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  Public RAG pipeline
@@ -305,7 +273,7 @@ class RAGPipeline:
         cfg.validate()                                # fail fast on missing API key
         self._embedder = EmbeddingModel(cfg.EMBEDDING_MODEL)
         self._store: Optional[FAISSVectorStore] = None
-        self._llm = GeminiLLM(cfg.GEMINI_MODEL, cfg.GOOGLE_API_KEY)
+        self._llm = GroqLLM(cfg.LLM_MODEL, cfg.GROQ_API_KEY)
         self._all_chunks: List[str] = []             # flat list for multi-PDF
 
     # ── Indexing ──────────────────────────────────────────────────
@@ -342,7 +310,7 @@ class RAGPipeline:
             num_chunks=self._store.size,
             embedding_dim=self._embedder.dim,
             model_name=cfg.EMBEDDING_MODEL,
-            llm_model=cfg.GEMINI_MODEL,
+            llm_model=cfg.LLM_MODEL,
         )
 
     # ── Querying ─────────────────────────────────────────────────
