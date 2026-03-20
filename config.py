@@ -22,7 +22,7 @@ class Config:
 
     # ── Groq (PRIMARY) ──
     GROQ_API_KEY = get_env("GROQ_API_KEY")
-    LLM_MODEL = get_env("LLM_MODEL", "llama3-8b-8192")
+    LLM_MODEL = get_env("LLM_MODEL", "llama-3.1-8b-instant")
 
     # ── Embeddings ──
     EMBEDDING_MODEL = get_env("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
