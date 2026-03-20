@@ -6,62 +6,50 @@ All tuneable knobs live here — read from environment variables.
 """
 
 import os
+import streamlit as st
 from dotenv import load_dotenv
+from groq import Groq
 
 load_dotenv()
 
 
+def get_env(key: str, default: str = ""):
+    return os.getenv(key) or st.secrets.get(key, default)
+
+
 class Config:
-    # ── LLM provider selection ────────────────────────────────────
-    # "gemini" or "groq"  (groq recommended — free tier, no billing needed)
-    LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "groq").lower()
+    # ── LLM Provider ──
+    LLM_PROVIDER = get_env("LLM_PROVIDER", "groq").lower()
 
-    # ── Gemini settings ───────────────────────────────────────────
-    GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
-    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    # ── Groq (PRIMARY) ──
+    GROQ_API_KEY = get_env("GROQ_API_KEY")
+    LLM_MODEL = get_env("LLM_MODEL", "llama3-8b-8192")
 
-    # ── Groq settings ─────────────────────────────────────────────
-    # Free tier: 14,400 req/day — https://console.groq.com/keys
-    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
-    GROQ_MODEL: str = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
+    # ── Embeddings ──
+    EMBEDDING_MODEL = get_env("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
 
-    # ── Embedding model (local, no API key needed) ────────────────
-    EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
+    # ── Chunking ──
+    CHUNK_SIZE = int(get_env("CHUNK_SIZE", "800"))
+    CHUNK_OVERLAP = int(get_env("CHUNK_OVERLAP", "150"))
 
-    # ── Chunking ──────────────────────────────────────────────────
-    CHUNK_SIZE: int = int(os.getenv("CHUNK_SIZE", 800))
-    CHUNK_OVERLAP: int = int(os.getenv("CHUNK_OVERLAP", 150))
+    # ── Retrieval ──
+    TOP_K_CHUNKS = int(get_env("TOP_K_CHUNKS", "5"))
 
-    # ── Retrieval ─────────────────────────────────────────────────
-    TOP_K_CHUNKS: int = int(os.getenv("TOP_K_CHUNKS", 5))
-
-    # ── UI ────────────────────────────────────────────────────────
-    #APP_TITLE: str = "Smart PDF Chat"
-    #APP_SUBTITLE: str = "Upload PDFs · Ask questions · Get grounded answers"
+    # ── UI ──
     APP_TITLE = "DocuMind AI"
     APP_SUBTITLE = "Chat with your documents using AI"
 
     @classmethod
-    def validate(cls) -> None:
-        """Fail fast if the selected provider has no API key."""
-        if cls.LLM_PROVIDER == "gemini":
-            if not cls.GOOGLE_API_KEY:
-                raise EnvironmentError(
-                    "GOOGLE_API_KEY is not set. Add it to your .env file.\n"
-                    "Get a key at: https://aistudio.google.com/app/apikey\n"
-                    "Or switch to Groq: set LLM_PROVIDER=groq in .env"
-                )
-        elif cls.LLM_PROVIDER == "groq":
+    def validate(cls):
+        if cls.LLM_PROVIDER == "groq":
             if not cls.GROQ_API_KEY:
                 raise EnvironmentError(
-                    "GROQ_API_KEY is not set. Add it to your .env file.\n"
-                    "Get a free key at: https://console.groq.com/keys"
+                    "GROQ_API_KEY is not set.\n"
+                    "Add it in .env (local) or Streamlit Secrets (cloud).\n"
+                    "Get key: https://console.groq.com/keys"
                 )
         else:
-            raise EnvironmentError(
-                f"Unknown LLM_PROVIDER='{cls.LLM_PROVIDER}'. "
-                "Must be 'gemini' or 'groq'."
-            )
+            raise EnvironmentError("Only 'groq' is supported in this version.")
 
 
 cfg = Config()
