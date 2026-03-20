@@ -32,7 +32,7 @@ class Config:
     CHUNK_OVERLAP = int(get_env("CHUNK_OVERLAP", "150"))
 
     # ── Retrieval ──
-    TOP_K_CHUNKS = int(get_env("TOP_K_CHUNKS", "5"))
+    TOP_K_CHUNKS = int(get_env("TOP_K_CHUNKS", "8"))
 
     # ── UI ──
     APP_TITLE = "DocuMind AI"
