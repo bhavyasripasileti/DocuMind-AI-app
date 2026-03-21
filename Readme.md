@@ -126,7 +126,7 @@ pip install -r requirements.txt
 Create `.env` file in root folder:
 
 ```env
-GROQ_API_KEY=your_groq_api_key_here
+GROQ_API_KEY=groq_api_key_here
 ```
 
 👉 Get free API key: https://console.groq.com/keys
@@ -155,10 +155,10 @@ http://localhost:8501
 4. Add Secrets:
 
 ```toml
-GROQ_API_KEY = "your_groq_api_key_here"
+GROQ_API_KEY = "----"
 ```
 
-5. Click **Deploy** 🚀
+5. Click **Deploy** 
 
 ---
 
