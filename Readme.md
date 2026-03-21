@@ -1,10 +1,21 @@
-# 📄 DocuMind AI — RAG Application
+# 🧠 DocuMind AI — Smart PDF Chat using RAG + LLM
 
-> Upload PDFs · Ask questions · Get answers grounded in your documents — no hallucinations.
+> Upload PDFs · Ask questions · Get accurate answers grounded in your documents — powered by Retrieval-Augmented Generation (RAG).
 
 ---
 
-## Architecture Overview
+## ✨ Key Features
+
+* 📄 Chat with multiple PDFs in real-time
+* 🧠 RAG-based architecture (reduces hallucinations)
+* ⚡ Ultra-fast responses using Groq LLM
+* 🔍 Source-based answers with context excerpts
+* 💬 Chat history maintained within session
+* 🎯 Clean and interactive Streamlit UI
+
+---
+
+## 🏗️ Architecture Overview
 
 ```
 User uploads PDF(s)
@@ -16,162 +27,138 @@ User uploads PDF(s)
          │
          ▼
 ┌──────────────────┐
-│  Text Splitter   │  RecursiveCharacterTextSplitter (chunk_size=800, overlap=150)
+│  Text Splitter   │  Chunking (size=1000, overlap=150)
 └────────┬─────────┘
          │
          ▼
 ┌──────────────────┐
-│ Embedding Model  │  SentenceTransformers (all-MiniLM-L6-v2, 384-dim, local)
+│ Embedding Model  │  SentenceTransformers (all-MiniLM-L6-v2)
 └────────┬─────────┘
          │
          ▼
 ┌──────────────────┐
-│  FAISS Index     │  IndexFlatIP (exact inner-product search)
-└────────┬─────────┘
-         │  ◄──── User question (also embedded)
-         ▼
-┌──────────────────┐
-│  Top-K Retrieval │  Returns most relevant chunks (default k=5)
+│  FAISS Index     │  Vector similarity search
 └────────┬─────────┘
          │
          ▼
 ┌──────────────────┐
-│  Prompt Builder  │  System prompt + numbered context excerpts + question
+│  Top-K Retrieval │  Relevant chunks (k=8)
 └────────┬─────────┘
          │
          ▼
 ┌──────────────────┐
-│  Google Gemini   │  Generates grounded answer (temperature=0.2)
+│  Prompt Builder  │  Context + Question
 └────────┬─────────┘
          │
          ▼
-     Answer + source excerpts displayed in chat UI
+┌──────────────────┐
+│   Groq LLM       │  llama-3.1-8b-instant
+└────────┬─────────┘
+         │
+         ▼
+ Answer + Source Excerpts in Chat UI
 ```
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
-smart_pdf_chat/
-├── app.py             ← Streamlit UI (chat interface, sidebar, source display)
-├── rag_pipeline.py    ← Core RAG engine (embed, index, retrieve, generate)
-├── utils.py           ← Pure helpers (PDF parse, chunking, sanitization)
-├── config.py          ← All settings read from environment variables
-├── requirements.txt   ← Pinned Python dependencies
-├── .env.example       ← Template for your API key & tunable parameters
-└── README.md          ← This file
+DocuMind_AI/
+├── app.py              # Streamlit UI (chat interface)
+├── rag_pipeline.py     # Core RAG engine
+├── utils.py            # PDF parsing + chunking
+├── config.py           # Environment-based configuration
+├── requirements.txt    # Dependencies
+├── .gitignore
+└── README.md
 ```
 
 ---
 
-## Prerequisites
+## ⚙️ Tech Stack
 
-| Tool    | Minimum version | Notes                         |
-|---------|----------------|-------------------------------|
-| Python  | 3.10+          | 3.11 recommended              |
-| pip     | 23+            | `pip install --upgrade pip`   |
-| Git     | any            | optional, for cloning         |
+* **Frontend**: Streamlit
+* **Backend**: Python
+* **LLM**: Groq (LLaMA 3.1)
+* **Embeddings**: Sentence Transformers
+* **Vector DB**: FAISS
+* **PDF Processing**: PyMuPDF
 
 ---
 
-## Step-by-Step Setup
+## 🚀 Step-by-Step Setup
 
-### Step 1 — Clone / download the project
+### 1️⃣ Clone Repository
 
 ```bash
-git clone <your-repo-url> smart_pdf_chat
-cd smart_pdf_chat
+git clone <your-repo-url>
+cd DocuMind_AI
 ```
-
-Or simply copy the files into a folder named `smart_pdf_chat`.
 
 ---
 
-### Step 2 — Create a virtual environment
+### 2️⃣ Create Virtual Environment
 
 ```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
 # macOS / Linux
-python3 -m venv .venv
-source .venv/bin/activate
-
-# Windows (PowerShell)
-python -m venv .venv
-.venv\Scripts\Activate.ps1
+python3 -m venv venv
+source venv/bin/activate
 ```
-
-You should see `(.venv)` in your terminal prompt.
 
 ---
 
-### Step 3 — Install dependencies
+### 3️⃣ Install Dependencies
 
 ```bash
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-This installs:
-- `streamlit` – UI framework
-- `PyMuPDF` – PDF text extraction
-- `langchain` – text splitting utilities
-- `sentence-transformers` – local embeddings (downloads ~90 MB model on first run)
-- `faiss-cpu` – vector similarity search
-- `google-generativeai` – Gemini API client
-- `python-dotenv` – loads `.env` file
-
-> **Note:** The first run downloads the SentenceTransformer model (~90 MB). Subsequent runs are instant.
-
 ---
 
-### Step 4 — Get a Google Gemini API key
+### 4️⃣ Configure Environment
 
-1. Go to → https://aistudio.google.com/app/apikey
-2. Sign in with your Google account
-3. Click **Create API Key**
-4. Copy the key (starts with `AIza…`)
+Create `.env` file in root folder:
 
-> The free tier gives you generous quota — plenty for development and testing.
-
----
-
-### Step 5 — Configure your environment
-
-```bash
-cp .env.example .env
+```env
+GROQ_API_KEY=your_groq_api_key_here
 ```
 
-Open `.env` in any text editor and paste your key:
-
-```dotenv
-GOOGLE_API_KEY=AIzaSy...your_actual_key_here...
-```
-
-You can also tweak other parameters in `.env`:
-
-| Variable         | Default            | What it does                              |
-|------------------|--------------------|-------------------------------------------|
-| `GEMINI_MODEL`   | `gemini-1.5-flash` | Gemini model (flash = fast & cheap)       |
-| `EMBEDDING_MODEL`| `all-MiniLM-L6-v2` | Local embedding model                     |
-| `CHUNK_SIZE`     | `800`              | Characters per chunk                      |
-| `CHUNK_OVERLAP`  | `150`              | Overlap between consecutive chunks        |
-| `TOP_K_CHUNKS`   | `5`                | Context chunks sent to LLM per question   |
+👉 Get free API key: https://console.groq.com/keys
 
 ---
 
-### Step 6 — Run the application
+### 5️⃣ Run Application
 
 ```bash
 streamlit run app.py
 ```
 
-Your browser should open automatically at:
+Open browser:
 
 ```
 http://localhost:8501
 ```
 
-If it doesn't, open that URL manually.
+---
+
+## 🌐 Deployment (Streamlit Cloud)
+
+1. Push project to GitHub
+2. Go to https://share.streamlit.io/
+3. Select your repo → `app.py`
+4. Add Secrets:
+
+```toml
+GROQ_API_KEY = "your_groq_api_key_here"
+```
+
+5. Click **Deploy** 🚀
 
 ---
 
@@ -187,30 +174,28 @@ If it doesn't, open that URL manually.
 
 ---
 
-## Troubleshooting
+## 🔮 Future Improvements
 
-| Symptom | Cause | Fix |
-|---------|-------|-----|
-| `GOOGLE_API_KEY is not set` | `.env` missing or key not set | Check Step 4 & 5 |
-| `No extractable text` | Scanned/image PDF | Run OCR first (e.g. Adobe, Tesseract) |
-| `password-protected` | Encrypted PDF | Decrypt with Adobe or `qpdf` |
-| Slow first startup | Embedding model downloading | Wait ~1 min; only happens once |
-| `faiss-cpu` install fails | Missing build tools | `pip install faiss-cpu --no-build-isolation` |
-| Generic API error | Gemini rate limit | Wait 60 s and retry; or use a paid tier |
+* Multi-document memory
+* Highlight exact answer spans
+* Export chat as PDF
+* Docker deployment
+* OCR for scanned PDFs
 
 ---
 
-## Production Hardening (Next Steps)
+## 💼 Project Highlights
 
-- **Persistence**: Save the FAISS index to disk with `faiss.write_index` so re-uploads aren't needed after restarts.
-- **Authentication**: Add Streamlit's built-in `st.secrets` and a simple login page.
-- **OCR support**: Integrate `pytesseract` for scanned PDFs.
-- **Async**: Move embedding and LLM calls to `asyncio` workers to avoid blocking the UI.
-- **Observability**: Add LangSmith or Weights & Biases tracing for production monitoring.
-- **Containerisation**: Wrap in a `Dockerfile` and deploy on Cloud Run / Fly.io.
+* Built a real-world **RAG pipeline**
+* Integrated **Groq LLM for fast inference**
+* Implemented **vector search using FAISS**
+* Designed an **end-to-end AI application**
+* Deployed using **Streamlit Cloud**
 
 ---
 
-## License
+## 📜 License
 
-MIT — use freely, attribute kindly.
+MIT License — free to use and modify.
+
+##  Built with ❤️ by Bhavya Sri Pasileti
