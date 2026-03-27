@@ -17,12 +17,17 @@
 
 <br/>
 
-**[Live App Link](https://twtqy2ewdvbfszhb39seck.streamlit.app) · [🧠 Architecture](#️-architecture-overview) · [📦 Setup](#-step-by-step-setup) · [✨ Features](#-key-features)**
+**[Live Demo](#-live-demo) · [🧠 Architecture](#️-architecture-overview) · [📦 Setup](#-step-by-step-setup) · [✨ Features](#-key-features)**
 
 </div>
 
 ---
 
+## 🌐 Live App
+
+> 🔗 **[Click here to explore the dashboard »](https://twtqy2ewdvbfszhb39seck.streamlit.app)**
+
+---
 ## 🌐 Overview
 
 Understanding long PDFs manually is time-consuming and inefficient.
