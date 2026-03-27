@@ -88,7 +88,7 @@ DocuMind_AI/
 ---
 
 ## 🛠️ Tech Stack
-```
+
 | Category        | Technology                              |
 | --------------- | --------------------------------------- |
 | Language        | Python 3.9+                             |
@@ -98,7 +98,7 @@ DocuMind_AI/
 | Embeddings      | SentenceTransformers (all-MiniLM-L6-v2) |
 | Vector Database | FAISS                                   |
 | PDF Processing  | PyMuPDF                                 |
-```
+
 ---
 
 ## 🚀 Step-by-Step Setup
