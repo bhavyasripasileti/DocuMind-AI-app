@@ -25,7 +25,7 @@
 
 ## 🌐 Live App
 
-> 🔗 **[Click here to explore the dashboard »](https://twtqy2ewdvbfszhb39seck.streamlit.app)**
+> 🔗 **[Click here to explore the App »](https://twtqy2ewdvbfszhb39seck.streamlit.app)**
 
 ---
 ## 🌐 Overview
